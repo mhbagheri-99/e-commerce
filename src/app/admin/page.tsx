@@ -12,40 +12,42 @@ const getSalesData = async () => {
   const data = await db.order.aggregate({
     _sum: { totalInCents: true },
     _count: true,
-  })
+  });
   return {
     amount: (data._sum.totalInCents ?? 0) / 100,
     numberOfSales: data._count,
   };
-}
+};
 
 const getCustomersData = async () => {
   const [customerCount, orderData] = await Promise.all([
     db.user.count(),
     db.order.aggregate({
       _sum: { totalInCents: true },
-    })
+    }),
   ]);
   return {
     customerCount,
-    averageTotalSales: customerCount === 0 ? 0 : (orderData._sum.totalInCents ?? 0) / 100 / customerCount,
+    averageTotalSales:
+      customerCount === 0
+        ? 0
+        : (orderData._sum.totalInCents ?? 0) / 100 / customerCount,
   };
-}
+};
 
 const getProductsData = async () => {
   const [activeProductsCount, inactiveProductsCount] = await Promise.all([
     db.product.count({ where: { isAvailable: true } }),
     db.product.count({ where: { isAvailable: false } }),
-    ]);
+  ]);
   return {
     activeProductsCount,
     inactiveProductsCount,
   };
-}
+};
 
 const AdminDashboard = async () => {
-
-  const [salesData, customersData, productsData] = await Promise.all([ 
+  const [salesData, customersData, productsData] = await Promise.all([
     getSalesData(),
     getCustomersData(),
     getProductsData(),
