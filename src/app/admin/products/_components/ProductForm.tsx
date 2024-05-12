@@ -12,7 +12,10 @@ import { Product } from "@prisma/client";
 import Image from "next/image";
 
 const ProductForm = ({ product }: { product?: Product | null }) => {
-  const [error, action] = useFormState((product == null) ? addProduct : updateProduct.bind(null, product.id), {});
+  const [error, action] = useFormState(
+    product == null ? addProduct : updateProduct.bind(null, product.id),
+    {},
+  );
   const [priceInCents, setPriceInCents] = useState<number | undefined>(
     product?.priceInCents,
   );
@@ -61,13 +64,29 @@ const ProductForm = ({ product }: { product?: Product | null }) => {
       <div className="space-y-2">
         <Label htmlFor="file">File</Label>
         <Input type="file" id="file" name="file" required={product === null} />
-        {product && <div className="text-muted-foreground">Leave empty to keep the existing file</div>}
+        {product && (
+          <div className="text-muted-foreground">
+            Leave empty to keep the existing file
+          </div>
+        )}
         {error.file && <div className="text-destructive">{error.file}</div>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="image">Image</Label>
-        <Input type="file" id="image" name="image" required={product === null} />
-        {product && <Image src={product.imagePath} alt="Product Image" width={400} height={400} />}
+        <Input
+          type="file"
+          id="image"
+          name="image"
+          required={product === null}
+        />
+        {product && (
+          <Image
+            src={product.imagePath}
+            alt="Product Image"
+            width={400}
+            height={400}
+          />
+        )}
         {error.image && <div className="text-destructive">{error.image}</div>}
       </div>
       <SubmitButton />

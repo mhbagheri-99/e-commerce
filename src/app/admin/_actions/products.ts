@@ -59,7 +59,7 @@ const updateSchema = addSchema.extend({
 export const updateProduct = async (
   id: string,
   prevState: unknown,
-  formData: FormData
+  formData: FormData,
 ) => {
   const result = updateSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!result.success) {
@@ -107,7 +107,7 @@ export const updateProduct = async (
   });
 
   redirect("/admin/products");
-}
+};
 
 export const setProductAvailability = async (
   id: string,
