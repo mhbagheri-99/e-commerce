@@ -5,23 +5,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatCurrency } from "@/lib/formatters";
-import React, { useState } from "react";
-import { addProduct } from "../../_actions/products";
+import { useState } from "react";
+import { addProduct, updateProduct } from "../../_actions/products";
+import { useFormState, useFormStatus } from "react-dom";
+import { Product } from "@prisma/client";
+import Image from "next/image";
 
-const ProductForm = () => {
-  const [priceInCents, setPriceInCents] = useState<number>();
+const ProductForm = ({ product }: { product?: Product | null }) => {
+  const [error, action] = useFormState((product == null) ? addProduct : updateProduct.bind(null, product.id), {});
+  const [priceInCents, setPriceInCents] = useState<number | undefined>(
+    product?.priceInCents,
+  );
   return (
-    <form action={addProduct} className="space-y-8">
+    <form action={action} className="space-y-8">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
-        <Input type="text" id="name" name="name" required />
+        <Input
+          type="text"
+          id="name"
+          name="name"
+          required
+          defaultValue={product?.name || ""}
+        />
+        {error.name && <div className="text-destructive">{error.name}</div>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="price">Price in Cents</Label>
+        <Label htmlFor="priceInCents">Price in Cents</Label>
         <Input
           type="number"
-          id="price"
-          name="price"
+          id="priceInCents"
+          name="priceInCents"
           required
           value={priceInCents}
           onChange={(e) => setPriceInCents(Number(e.target.value) || undefined)}
@@ -29,22 +42,46 @@ const ProductForm = () => {
         <div className="text-muted-foreground">
           {formatCurrency((priceInCents || 0) / 100)}
         </div>
+        {error.priceInCents && (
+          <div className="text-destructive">{error.priceInCents}</div>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" required />
+        <Textarea
+          id="description"
+          name="description"
+          required
+          defaultValue={product?.description || ""}
+        />
+        {error.description && (
+          <div className="text-destructive">{error.description}</div>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="file">File</Label>
-        <Input type="file" id="file" name="file" required />
+        <Input type="file" id="file" name="file" required={product === null} />
+        {product && <div className="text-muted-foreground">Leave empty to keep the existing file</div>}
+        {error.file && <div className="text-destructive">{error.file}</div>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="image">Image</Label>
-        <Input type="file" id="image" name="image" required />
+        <Input type="file" id="image" name="image" required={product === null} />
+        {product && <Image src={product.imagePath} alt="Product Image" width={400} height={400} />}
+        {error.image && <div className="text-destructive">{error.image}</div>}
       </div>
-      <Button type="submit">Save</Button>
+      <SubmitButton />
     </form>
   );
 };
 
 export default ProductForm;
+
+const SubmitButton = () => {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? "Saving..." : "Save"}
+    </Button>
+  );
+};
