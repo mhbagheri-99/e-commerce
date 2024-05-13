@@ -1,10 +1,29 @@
-import { formatCurrency } from "@/lib/formatters"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card"
-import { Button } from "./ui/button"
-import Link from "next/link"
-import Image from "next/image"
+import { formatCurrency } from "@/lib/formatters";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Button } from "./ui/button";
+import Link from "next/link";
+import Image from "next/image";
 
-const ProductCard = ({ id, name, priceInCents, description,  imagePath }: { id: string, name: string, priceInCents: number, description: string, imagePath: string }) => {
+const ProductCard = ({
+  id,
+  name,
+  priceInCents,
+  description,
+  imagePath,
+}: {
+  id: string;
+  name: string;
+  priceInCents: number;
+  description: string;
+  imagePath: string;
+}) => {
   return (
     <Card className="flex overflow-hidden flex-col">
       <div className="relative w-full h-auto aspect-video">
@@ -23,10 +42,10 @@ const ProductCard = ({ id, name, priceInCents, description,  imagePath }: { id: 
         </Button>
       </CardFooter>
     </Card>
-  )
-}
+  );
+};
 
-export default ProductCard
+export default ProductCard;
 
 export const ProductCardSkeleton = () => {
   return (
@@ -49,5 +68,5 @@ export const ProductCardSkeleton = () => {
         <Button className="w-full" disabled size="lg"></Button>
       </CardFooter>
     </Card>
-  )
-}
+  );
+};

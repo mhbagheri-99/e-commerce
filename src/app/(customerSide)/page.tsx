@@ -1,26 +1,35 @@
 import ProductCard, { ProductCardSkeleton } from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import db from "@/db/db";
+import { cache } from "@/lib/cache";
 import { Product } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-const getMostPopularProducts = async () => {
-  return await db.product.findMany({
-    where: { isAvailable: true },
-    orderBy: { orders: {_count:  "desc"} },
-    take: 6,
-  });
-}
+const getMostPopularProducts = cache(
+  async () => {
+    return await db.product.findMany({
+      where: { isAvailable: true },
+      orderBy: { orders: { _count: "desc" } },
+      take: 6,
+    });
+  },
+  ["/", "most-popular-products"],
+  { revalidate: 60 * 60 * 24 },
+);
 
-const getRecentlyAddedProducts = async () => {
-  return await db.product.findMany({
-    where: { isAvailable: true },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
-}
+const getRecentlyAddedProducts = cache(
+  async () => {
+    return await db.product.findMany({
+      where: { isAvailable: true },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    });
+  },
+  ["/", "recently-added-products"],
+  { revalidate: 60 * 60 * 24 },
+);
 
 const HomePage = () => {
   return (
@@ -34,8 +43,8 @@ const HomePage = () => {
         productsRetriever={getRecentlyAddedProducts}
       />
     </main>
-  )
-}
+  );
+};
 
 export default HomePage;
 
@@ -58,27 +67,28 @@ const ProductGridSection = ({
         </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Suspense fallback={
-          <>
-            <ProductCardSkeleton />
-            <ProductCardSkeleton />
-            <ProductCardSkeleton />
-          </>
-        }>
+        <Suspense
+          fallback={
+            <>
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+              <ProductCardSkeleton />
+            </>
+          }
+        >
           <ProductSuspense productsRetriever={productsRetriever} />
         </Suspense>
       </div>
     </div>
   );
-}
+};
 
-const ProductSuspense = async ({ productsRetriever }: {productsRetriever: () => Promise<Product[]>}) => {
-  return (
-    (await productsRetriever()).map((product) => (
-      <ProductCard
-        key={product.id}
-        {...product}
-      />
-    ))
-  )
-}
+const ProductSuspense = async ({
+  productsRetriever,
+}: {
+  productsRetriever: () => Promise<Product[]>;
+}) => {
+  return (await productsRetriever()).map((product) => (
+    <ProductCard key={product.id} {...product} />
+  ));
+};
