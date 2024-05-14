@@ -1,5 +1,6 @@
 "use client";
 
+import { userOrderExists } from "@/app/actions/order";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -49,7 +50,7 @@ const CheckoutForm = ({ product, clientSecret }: CheckoutFormProps) => {
         </div>
       </div>
       <Elements options={{ clientSecret }} stripe={stripePromise}>
-        <Form priceInCents={product.priceInCents} />
+        <Form priceInCents={product.priceInCents} productId={product.id} />
       </Elements>
     </div>
   );
@@ -57,7 +58,13 @@ const CheckoutForm = ({ product, clientSecret }: CheckoutFormProps) => {
 
 export default CheckoutForm;
 
-const Form = ({ priceInCents }: { priceInCents: number }) => {
+const Form = ({
+  priceInCents,
+  productId,
+}: {
+  priceInCents: number;
+  productId: string;
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +79,16 @@ const Form = ({ priceInCents }: { priceInCents: number }) => {
     }
 
     setIsLoading(true);
+
+    const orderExists = await userOrderExists(email, productId);
+
+    if (orderExists) {
+      setErrorMessage(
+        "You have already purchased this product. You can access it in 'My Orders' page.",
+      );
+      setIsLoading(false);
+      return;
+    }
 
     stripe
       .confirmPayment({
@@ -106,7 +123,11 @@ const Form = ({ priceInCents }: { priceInCents: number }) => {
         <CardContent>
           <PaymentElement />
           <div className="mt-4">
-            <LinkAuthenticationElement onChange={(e) => {setEmail(e.value.email)}} />
+            <LinkAuthenticationElement
+              onChange={(e) => {
+                setEmail(e.value.email);
+              }}
+            />
           </div>
         </CardContent>
         <CardFooter>

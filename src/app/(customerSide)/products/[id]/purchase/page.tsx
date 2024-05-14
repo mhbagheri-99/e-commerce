@@ -21,7 +21,7 @@ const ProductPurchasePage = async ({
     amount: product.priceInCents,
     currency: "USD",
     metadata: {
-      product: product.id,
+      productId: product.id,
     },
   });
 
