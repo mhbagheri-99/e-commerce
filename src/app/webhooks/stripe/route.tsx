@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import {Resend} from "resend";
 import React from "react";
+import PurchaseReceipt from "@/email/PurchaseReceipt";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -55,7 +56,7 @@ export const POST = async (req: NextRequest) => {
       from: `Support <${process.env.RESEND_DOMAIN}>`,
       to: email,
       subject: "Your order is ready",
-      react:  <h1>hey there</h1>,
+      react:  <PurchaseReceipt order={order} product={product} downloadVerificationId={downloadVerification.id} />,
     })
   }
   return new NextResponse();
