@@ -1,0 +1,83 @@
+import {
+  Body,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Preview,
+  Tailwind,
+} from "@react-email/components"
+import OrderInfo from "./components/OrderInfo"
+import React from "react"
+
+type OrderHistoryEmailProps = {
+  orders: {
+    id: string
+    totalInCents: number
+    createdAt: Date
+    downloadVerificationId: string
+    product: {
+      name: string
+      imagePath: string
+      description: string
+    }
+  }[]
+}
+
+const OrderHistoryEmail = ({ orders }: OrderHistoryEmailProps) => {
+  return (
+    <Html>
+      <Preview>Order History & Downloads</Preview>
+      <Tailwind>
+        <Head />
+        <Body className="font-sans bg-white">
+          <Container className="max-w-xl">
+            <Heading>Order History</Heading>
+            {orders.map((order, index) => (
+              <React.Fragment key={order.id}>
+                <OrderInfo
+                  order={order}
+                  product={order.product}
+                  downloadVerificationId={order.downloadVerificationId}
+                />
+                {index < orders.length - 1 && <Hr />}
+              </React.Fragment>
+            ))}
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  )
+}
+
+export default OrderHistoryEmail
+
+OrderHistoryEmail.PreviewProps = {
+  orders: [
+    {
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      totalInCents: 10000,
+      downloadVerificationId: crypto.randomUUID(),
+      product: {
+        name: "Product name",
+        description: "Some description",
+        imagePath:
+          "/products/5aba7442-e4a5-4d2e-bfa7-5bd358cdad64-02 - What Is Next.js.jpg",
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      totalInCents: 2000,
+      downloadVerificationId: crypto.randomUUID(),
+      product: {
+        name: "Product name 2",
+        description: "Some other desc",
+        imagePath:
+          "/products/db3035a5-e762-41b0-996f-d54ec730bc9c-01 - Course Introduction.jpg",
+      },
+    },
+  ],
+} satisfies OrderHistoryEmailProps
