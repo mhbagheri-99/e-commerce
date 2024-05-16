@@ -5,17 +5,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import db from "@/db/db"
-import { formatCurrency } from "@/lib/formatters"
+} from "@/components/ui/table";
+import db from "@/db/db";
+import { formatCurrency } from "@/lib/formatters";
 import PageHeader from "../_components/PageHeader";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreVertical } from "lucide-react"
-import { DeleteDropDownItem } from "./_components/OrderActions"
+} from "@/components/ui/dropdown-menu";
+import { Minus, MoreVertical } from "lucide-react";
+import { DeleteDropDownItem } from "./_components/OrderActions";
 
 function getOrders() {
   return db.order.findMany({
@@ -24,9 +24,10 @@ function getOrders() {
       totalInCents: true,
       product: { select: { name: true } },
       user: { select: { email: true } },
+      discountCode: { select: { code: true } },
     },
     orderBy: { createdAt: "desc" },
-  })
+  });
 }
 
 export default function OrdersPage() {
@@ -35,13 +36,13 @@ export default function OrdersPage() {
       <PageHeader>Sales</PageHeader>
       <OrdersTable />
     </>
-  )
+  );
 }
 
 async function OrdersTable() {
-  const orders = await getOrders()
+  const orders = await getOrders();
 
-  if (orders.length === 0) return <p>No sales found</p>
+  if (orders.length === 0) return <p>No sales found</p>;
 
   return (
     <Table>
@@ -50,18 +51,20 @@ async function OrdersTable() {
           <TableHead>Product</TableHead>
           <TableHead>Customer</TableHead>
           <TableHead>Price Paid</TableHead>
+          <TableHead>Coupon</TableHead>
           <TableHead className="w-0">
             <span className="sr-only">Actions</span>
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {orders.map(order => (
+        {orders.map((order) => (
           <TableRow key={order.id}>
             <TableCell>{order.product.name}</TableCell>
             <TableCell>{order.user.email}</TableCell>
+            <TableCell>{formatCurrency(order.totalInCents / 100)}</TableCell>
             <TableCell>
-              {formatCurrency(order.totalInCents / 100)}
+              {order.discountCode == null ? <Minus /> : order.discountCode.code}
             </TableCell>
             <TableCell className="text-center">
               <DropdownMenu>
@@ -78,5 +81,5 @@ async function OrdersTable() {
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }

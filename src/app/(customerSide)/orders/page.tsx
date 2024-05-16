@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { emailOrderHistory } from "@/actions/orders"
-import { Button } from "@/components/ui/button"
+import { emailOrderHistory } from "@/actions/orders";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,14 +9,14 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useFormState, useFormStatus } from "react-dom"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useFormState, useFormStatus } from "react-dom";
 
 const MyOrdersPage = () => {
-  const [data, action] = useFormState(emailOrderHistory, {})
-  console.log(data)
+  const [data, action] = useFormState(emailOrderHistory, {});
+  console.log(data);
   return (
     <form action={action} className="max-2-xl mx-auto">
       <Card>
@@ -39,17 +39,17 @@ const MyOrdersPage = () => {
         </CardFooter>
       </Card>
     </form>
-  )
-}
+  );
+};
 
-export default MyOrdersPage
+export default MyOrdersPage;
 
 const SubmitButton = () => {
-  const { pending } = useFormStatus()
+  const { pending } = useFormStatus();
 
   return (
     <Button className="w-full" size="lg" disabled={pending} type="submit">
       {pending ? "Sending..." : "Send"}
     </Button>
-  )
-}
+  );
+};

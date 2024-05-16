@@ -6,18 +6,18 @@ import {
   Html,
   Preview,
   Tailwind,
-} from "@react-email/components"
-import OrderInfo from "./components/OrderInfo"
+} from "@react-email/components";
+import OrderInfo from "./components/OrderInfo";
 
 type PurchaseReceiptEmailProps = {
   product: {
-    name: string
-    imagePath: string
-    description: string
-  }
-  order: { id: string; createdAt: Date; totalInCents: number }
-  downloadVerificationId: string
-}
+    name: string;
+    imagePath: string;
+    description: string;
+  };
+  order: { id: string; createdAt: Date; totalInCents: number };
+  downloadVerificationId: string;
+};
 
 const PurchaseReceipt = ({
   product,
@@ -32,7 +32,7 @@ const PurchaseReceipt = ({
         <Body className="font-sans bg-white">
           <Container className="max-w-xl">
             <Heading className="text-2xl">Purchase Receipt</Heading>
-            <OrderInfo 
+            <OrderInfo
               order={order}
               product={product}
               downloadVerificationId={downloadVerificationId}
@@ -41,17 +41,16 @@ const PurchaseReceipt = ({
         </Body>
       </Tailwind>
     </Html>
-  )
-}
+  );
+};
 
-export default PurchaseReceipt
+export default PurchaseReceipt;
 
 PurchaseReceipt.PreviewProps = {
   product: {
     name: "Product name",
     description: "Some description",
-    imagePath:
-      "/products/a9bd13ee-e0c0-464c-bdf7-f2a9818aebfb-spritesheet.png",
+    imagePath: "/products/a9bd13ee-e0c0-464c-bdf7-f2a9818aebfb-spritesheet.png",
   },
   order: {
     id: crypto.randomUUID(),
@@ -59,4 +58,4 @@ PurchaseReceipt.PreviewProps = {
     totalInCents: 10000,
   },
   downloadVerificationId: crypto.randomUUID(),
-} satisfies PurchaseReceiptEmailProps
+} satisfies PurchaseReceiptEmailProps;

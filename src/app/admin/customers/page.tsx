@@ -5,16 +5,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import db from "@/db/db"
-import { formatCurrency, formatNumber } from "@/lib/formatters"
+} from "@/components/ui/table";
+import db from "@/db/db";
+import { formatCurrency, formatNumber } from "@/lib/formatters";
 import PageHeader from "../_components/PageHeader";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreVertical } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical } from "lucide-react";
 import { DeleteDropDownItem } from "./_components/UserActions";
 
 function getUsers() {
@@ -25,7 +25,7 @@ function getUsers() {
       orders: { select: { totalInCents: true } },
     },
     orderBy: { createdAt: "desc" },
-  })
+  });
 }
 
 export default function UsersPage() {
@@ -34,13 +34,13 @@ export default function UsersPage() {
       <PageHeader>Customers</PageHeader>
       <UsersTable />
     </>
-  )
+  );
 }
 
 async function UsersTable() {
-  const users = await getUsers()
+  const users = await getUsers();
 
-  if (users.length === 0) return <p>No customers found</p>
+  if (users.length === 0) return <p>No customers found</p>;
 
   return (
     <Table>
@@ -55,14 +55,13 @@ async function UsersTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.map(user => (
+        {users.map((user) => (
           <TableRow key={user.id}>
             <TableCell>{user.email}</TableCell>
             <TableCell>{formatNumber(user.orders.length)}</TableCell>
             <TableCell>
               {formatCurrency(
-                user.orders.reduce((sum, o) => o.totalInCents + sum, 0) /
-                  100
+                user.orders.reduce((sum, o) => o.totalInCents + sum, 0) / 100,
               )}
             </TableCell>
             <TableCell className="text-center">
@@ -80,5 +79,5 @@ async function UsersTable() {
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }

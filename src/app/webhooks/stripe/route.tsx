@@ -1,7 +1,7 @@
 import db from "../../../db/db";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import {Resend} from "resend";
+import { Resend } from "resend";
 import React from "react";
 import PurchaseReceipt from "@/email/PurchaseReceipt";
 
@@ -38,7 +38,9 @@ export const POST = async (req: NextRequest) => {
       },
     };
 
-    const { orders: [order] } = await db.user.upsert({
+    const {
+      orders: [order],
+    } = await db.user.upsert({
       where: { email },
       update: userData,
       create: userData,
@@ -56,8 +58,14 @@ export const POST = async (req: NextRequest) => {
       from: `Support <${process.env.RESEND_DOMAIN}>`,
       to: email,
       subject: "Your order is ready",
-      react:  <PurchaseReceipt order={order} product={product} downloadVerificationId={downloadVerification.id} />,
-    })
+      react: (
+        <PurchaseReceipt
+          order={order}
+          product={product}
+          downloadVerificationId={downloadVerification.id}
+        />
+      ),
+    });
   }
   return new NextResponse();
 };
