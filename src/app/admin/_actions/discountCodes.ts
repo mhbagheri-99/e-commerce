@@ -27,7 +27,7 @@ const addSchema = z
   })
   .refine((data) => !data.allProducts || data.discountedProductIds == null, {
     message:
-      "All products cannot be selected when specific products are selected.", // doesn't trigger
+      "All products cannot be selected when specific products are selected.", // BUG: doesn't trigger
     path: ["allProducts"],
   })
   .refine((data) => data.allProducts || data.discountedProductIds != null, {
