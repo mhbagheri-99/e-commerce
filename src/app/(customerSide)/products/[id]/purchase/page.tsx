@@ -23,25 +23,7 @@ const ProductPurchasePage = async ({
 
   const discountCode = coupon ? await getDiscountCode(coupon, id) : undefined;
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: product.priceInCents,
-    currency: "USD",
-    metadata: {
-      productId: product.id,
-    },
-  });
-
-  if (!paymentIntent.client_secret) {
-    throw new Error("Stripe failed to create payment intent properly");
-  }
-
-  return (
-    <CheckoutForm
-      product={product}
-      discountCode={discountCode}
-      clientSecret={paymentIntent.client_secret}
-    />
-  );
+  return <CheckoutForm product={product} discountCode={discountCode} />;
 };
 
 export default ProductPurchasePage;
@@ -49,7 +31,7 @@ export default ProductPurchasePage;
 const getDiscountCode = async (code: string, productId: string) => {
   const discountCode = await db.discountCode.findUnique({
     select: { id: true, discountType: true, discountAmount: true },
-    where: { ...usableCouponWhere(productId), code }, // BUG: doesn't restrict specific coupons
+    where: { ...usableCouponWhere(productId), code },
   });
 
   if (!discountCode) {

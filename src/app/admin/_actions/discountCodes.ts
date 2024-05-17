@@ -53,20 +53,12 @@ export const addCoupon = async (prevState: unknown, formData: FormData) => {
       : undefined,
   });
 
-  console.log(discountedProductIds);
-  console.log(result.success);
-
   if (!result.success) {
-    console.log(result.error.formErrors.fieldErrors);
     return result.error.formErrors.fieldErrors;
   }
 
   const data = result.data;
-
-  // console.log("All products cannot be selected when specific products are selected.", !data.allProducts || data.discountedProductIds == null);
-  // console.log("At least one product must be selected.", data.allProducts || data.discountedProductIds != null);
-  // console.log("Percentage discount must be less than or equal to 100%.",data.discountAmount <= 100 || data.discountType !== DiscountCodeType.PERCENTAGE);
-
+  
   await db.discountCode.create({
     data: {
       code: data.code,

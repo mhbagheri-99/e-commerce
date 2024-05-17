@@ -16,7 +16,6 @@ import { useFormState, useFormStatus } from "react-dom";
 
 const MyOrdersPage = () => {
   const [data, action] = useFormState(emailOrderHistory, {});
-  console.log(data);
   return (
     <form action={action} className="max-2-xl mx-auto">
       <Card>

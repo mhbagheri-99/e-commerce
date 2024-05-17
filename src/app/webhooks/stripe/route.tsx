@@ -18,8 +18,8 @@ export const POST = async (req: NextRequest) => {
   if (event.type === "charge.succeeded") {
     const charge = event.data.object as Stripe.Charge;
     const productId = charge.metadata.productId;
+    const discountCodeId = charge.metadata.discountCodeId;
     const email = charge.billing_details.email;
-    console.log("EMAIL: ", email);
     const totalInCents = charge.amount;
 
     const product = await db.product.findUnique({ where: { id: productId } });
@@ -34,6 +34,7 @@ export const POST = async (req: NextRequest) => {
         create: {
           productId,
           totalInCents,
+          discountCodeId,
         },
       },
     };
@@ -53,6 +54,13 @@ export const POST = async (req: NextRequest) => {
         productId,
       },
     });
+
+    if (discountCodeId) {
+      await db.discountCode.update({
+        where: { id: discountCodeId },
+        data: { used: { increment: 1 } },
+      });
+    }
 
     await resend.emails.send({
       from: `Support <${process.env.RESEND_DOMAIN}>`,

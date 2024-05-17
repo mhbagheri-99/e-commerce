@@ -1,6 +1,6 @@
 "use client";
 
-import { userOrderExists } from "@/app/actions/order";
+import { createPaymentIntent } from "@/actions/orders";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,7 +34,6 @@ type CheckoutFormProps = {
     discountType: DiscountCodeType;
     discountAmount: number;
   };
-  clientSecret: string;
 };
 
 const stripePromise = loadStripe(
@@ -44,7 +43,6 @@ const stripePromise = loadStripe(
 const CheckoutForm = ({
   product,
   discountCode,
-  clientSecret,
 }: CheckoutFormProps) => {
   const amount = discountCode == null ? product.priceInCents : getDiscountedPrice(product.priceInCents, discountCode);
   const isDiscounted = amount !== product.priceInCents;
@@ -74,9 +72,9 @@ const CheckoutForm = ({
           </div>
         </div>
       </div>
-      <Elements options={{ clientSecret }} stripe={stripePromise}>
+      <Elements options={{ amount, mode: "payment", currency: "usd" }} stripe={stripePromise}>
         <Form
-          priceInCents={product.priceInCents}
+          priceInCents={amount}
           productId={product.id}
           discountCode={discountCode}
         />
@@ -120,12 +118,26 @@ const Form = ({
 
     setIsLoading(true);
 
-    const orderExists = await userOrderExists(email, productId);
+    const formSubmit = await elements.submit();
+    
+    if (formSubmit.error) {
+      setErrorMessage(formSubmit.error.message);
+      setIsLoading(false);
+      return;
+    }
 
-    if (orderExists) {
-      setErrorMessage(
-        "You have already purchased this product. You can access it in 'My Orders' page.",
-      );
+    const paymentIntent = await createPaymentIntent(email, productId, discountCode?.id);
+
+    if (paymentIntent.error) {
+      setErrorMessage(paymentIntent.error);
+      setIsLoading(false);
+      return;
+    }
+
+    const clientSecret = paymentIntent.clientSecret;
+
+    if (!clientSecret) {
+      setErrorMessage("Stripe failed to create payment intent properly");
       setIsLoading(false);
       return;
     }
@@ -136,6 +148,7 @@ const Form = ({
         confirmParams: {
           return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
         },
+        clientSecret: clientSecret,
       })
       .then(({ error }) => {
         if (error.type === "card_error" || error.type === "validation_error") {

@@ -2,11 +2,14 @@
 
 import db from "@/db/db";
 import OrderHistoryEmail from "@/email/OrderHistory";
+import { getDiscountedPrice, usableCouponWhere } from "@/lib/couponHelpers";
 import { Resend } from "resend";
 import { z } from "zod";
+import Stripe from "stripe";
 
 const emailSchema = z.string().email();
 const resend = new Resend(process.env.RESEND_API_KEY as string);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export const emailOrderHistory = async (
   prevState: unknown,
@@ -78,4 +81,60 @@ export const emailOrderHistory = async (
     message:
       "Check your email to view your order history and download your products.",
   };
+};
+
+export const createPaymentIntent = async (
+  email: string,
+  productId: string,
+  discountCodeId?: string,
+) => {
+  const product = await db.product.findUnique({
+    where: { id: productId },
+    select: { id: true, priceInCents: true },
+  });
+
+  if (!product) {
+    return { error: "Product not found" };
+  }
+
+  const discountCode = discountCodeId
+    ? await db.discountCode.findUnique({
+        where: { id: discountCodeId, ...usableCouponWhere(productId) },
+      })
+    : undefined;
+
+  if (discountCodeId && !discountCode) {
+    return { error: "Invalid discount code" };
+  }
+
+  const orderExists = await db.order.findFirst({
+      where: {
+        user: { email },
+        productId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (orderExists) {
+      return { error: "You have already purchased this product. You can access it in 'My Orders' page." };
+    }
+
+  const amount = discountCode ? getDiscountedPrice(product.priceInCents, discountCode) : product.priceInCents;
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount,
+    currency: "USD",
+    metadata: {
+      productId: product.id,
+      discountCodeId: discountCode?.id || null,
+    },
+  });
+
+  if (!paymentIntent.client_secret) {
+    return { error: "Stripe failed to create payment intent properly" };
+  }
+
+  return { clientSecret: paymentIntent.client_secret };
 };

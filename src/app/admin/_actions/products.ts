@@ -67,7 +67,6 @@ export const updateProduct = async (
 ) => {
   const result = updateSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!result.success) {
-    console.log(result.error.formErrors.fieldErrors);
     return result.error.formErrors.fieldErrors;
   }
   const data = result.data;

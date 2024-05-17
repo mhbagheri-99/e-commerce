@@ -14,16 +14,29 @@ export const usableCouponWhere = (productId: string) => {
   } satisfies Prisma.DiscountCodeWhereInput;
 };
 
-export const getDiscountedPrice = (priceInCents: number, discountCode: {
-  discountType: DiscountCodeType;
-  discountAmount: number;
-}) => {
+export const getDiscountedPrice = (
+  priceInCents: number,
+  discountCode: {
+    discountType: DiscountCodeType;
+    discountAmount: number;
+  },
+) => {
   switch (discountCode.discountType) {
     case "PERCENTAGE":
-      return Math.max(1, Math.ceil(priceInCents - (priceInCents * discountCode.discountAmount) / 100));
+      return Math.max(
+        1,
+        Math.ceil(
+          priceInCents - (priceInCents * discountCode.discountAmount) / 100,
+        ),
+      );
     case "FIXED":
-      return Math.max(1, Math.ceil(priceInCents - discountCode.discountAmount*100));
+      return Math.max(
+        1,
+        Math.ceil(priceInCents - discountCode.discountAmount * 100),
+      );
     default:
-      throw new Error(`Invalid discount type ${discountCode.discountType satisfies never}`);
+      throw new Error(
+        `Invalid discount type ${discountCode.discountType satisfies never}`,
+      );
   }
-}
+};
